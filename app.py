@@ -1,11 +1,9 @@
 import streamlit as st
-from PIL import Image
-import pytesseract
 import time
 import google.generativeai as genai
 
 # ========== SETUP ==========
-genai.configure(api_key="AIzaSyAmF7hNQdmgKu7ilvW7vWoHN74vEgF7GBE")  # Replace with your Gemini key
+genai.configure(api_key="AIzaSyBUrWiT4phbZT9JKXAG5B8lap6KdHCs1sI")  # Replace with your Gemini key
 model = genai.GenerativeModel("models/gemini-1.5-pro-latest")
 
 st.set_page_config("🍳 AI Cooking Assistant", layout="centered")
@@ -22,10 +20,6 @@ if "trigger_prompt" not in st.session_state:
     st.session_state.trigger_prompt = None
 
 # ========== UTILS ==========
-def extract_text_from_image(uploaded_file):
-    img = Image.open(uploaded_file)
-    return pytesseract.image_to_string(img)
-
 def get_cooking_time(recipe_text):
     try:
         response = model.generate_content(f"Estimate total cooking time (in minutes only). Recipe: {recipe_text}")
@@ -43,17 +37,12 @@ def format_time(secs):
     return f"{mins:02d}:{sec:02d}"
 
 # ========== RECIPE INPUT ==========
-st.markdown("Upload an image or paste a recipe to get started:")
-upload = st.file_uploader("📸 Upload Recipe Image", type=["png", "jpg", "jpeg"])
-text_input = st.text_area("✍️ Or Paste Recipe")
-
-if upload:
-    text_input = extract_text_from_image(upload)
-    st.success("✅ Text extracted from image!")
+st.markdown("Paste a recipe to get started:")
+text_input = st.text_area("✍️ Paste Recipe")
 
 if st.button("🧠 Analyze with AI"):
     if text_input.strip() == "":
-        st.warning("Please enter or upload a recipe.")
+        st.warning("Please enter a recipe.")
     else:
         with st.spinner("Analyzing..."):
             time_est = get_cooking_time(text_input)
@@ -168,7 +157,6 @@ if final_input:
     st.chat_message("assistant").markdown(reply)
     st.session_state.chat_history.append({"role": "user", "content": final_input})
     st.session_state.chat_history.append({"role": "assistant", "content": reply})
-
     st.session_state.trigger_prompt = None
 
 # ========== QUICK CHAT BUTTONS ==========
